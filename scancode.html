@@ -1,0 +1,167 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Barcode and QR Code Generator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 20px;
+            background-color: #f0f0f0;
+        }
+        #barcode-container, #qrcode-container {
+            margin-top: 10px;
+        }
+        #input-section {
+            margin-bottom: 20px;
+        }
+        input {
+            padding: 5px;
+            font-size: 16px;
+            width: 300px;
+        }
+        button {
+            padding: 5px 10px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+        #error-message {
+            color: red;
+            margin-top: 10px;
+        }
+        .download-link {
+            margin-top: 10px;
+            text-decoration: none;
+            color: blue;
+            display: block;
+        }
+        #artifact-version {
+            margin-top: 20px;
+            font-size: 14px;
+            color: #555;
+        }
+    </style>
+</head>
+<body>
+    <div id="input-section">
+        <input type="text" id="code-text" placeholder="Enter text for barcode and QR code" value="HelloWorld123">
+        <button onclick="generateCodes()">Generate Codes</button>
+    </div>
+    <div id="barcode-container"></div>
+    <a id="barcode-download" class="download-link" href="#" download="barcode.png" style="display: none;">Download Barcode</a>
+    <div id="qrcode-container"></div>
+    <a id="qrcode-download" class="download-link" href="#" download="qrcode.png" style="display: none;">Download QR Code</a>
+    <div id="error-message"></div>
+    <div id="artifact-version">artifact_version_id: 7b8f4a2c-1d3e-4f5a-9b2c-8e7d6f4a2c1b</div>
+
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
+    <script>
+        function generateCodes() {
+            console.log('generateCodes function called');
+            const text = document.getElementById('code-text').value;
+            const errorDiv = document.getElementById('error-message');
+            const barcodeContainer = document.getElementById('barcode-container');
+            const qrcodeContainer = document.getElementById('qrcode-container');
+            const barcodeDownload = document.getElementById('barcode-download');
+            const qrcodeDownload = document.getElementById('qrcode-download');
+            errorDiv.textContent = '';
+            barcodeContainer.innerHTML = '';
+            qrcodeContainer.innerHTML = '';
+
+            if (!text) {
+                errorDiv.textContent = 'Error: Please enter some text';
+                console.error('No text provided');
+                return;
+            }
+
+            try {
+                // Generate Barcode
+                const barcodeCanvas = document.createElement('canvas');
+                JsBarcode(barcodeCanvas, text, {
+                    format: 'CODE128',
+                    displayValue: true,
+                    margin: 10,
+                    height: 60,
+                    width: 2
+                });
+                barcodeContainer.appendChild(barcodeCanvas);
+                barcodeDownload.href = barcodeCanvas.toDataURL('image/png');
+                barcodeDownload.style.display = 'block';
+                console.log('Barcode PNG generated');
+
+                // Generate QR Code
+                const qrCanvas = document.createElement('canvas');
+                QRCode.toCanvas(qrCanvas, text, {
+                    width: 150,
+                    margin: 1,
+                    color: { dark: '#000000', light: '#FFFFFF' }
+                }, function (error) {
+                    if (error) {
+                        errorDiv.textContent = 'Error generating QR code';
+                        console.error('QR code error:', error);
+                        return;
+                    }
+                    qrcodeContainer.appendChild(qrCanvas);
+                    qrcodeDownload.href = qrCanvas.toDataURL('image/png');
+                    qrcodeDownload.style.display = 'block';
+                    console.log('QR code PNG generated');
+                });
+            } catch (error) {
+                errorDiv.textContent = 'Error generating codes. Check console for details.';
+                console.error('Generation error:', error);
+            }
+        }
+
+        // Generate codes on page load
+        window.onload = function() {
+            console.log('Page loaded, generating initial codes');
+            generateCodes();
+        };
+    </script>
+</body>
+</html>
