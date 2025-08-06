@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text to Codes</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        textarea {
+            width: 80%;
+            height: 100px;
+            resize: none;
+            margin-bottom: 20px;
+            padding: 10px;
+            font-size: 16px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        #qrContainer {
+            width: 80%;
+            margin-top: 20px;
+        }
+        .qrCode {
+            margin-bottom: 40px;
+            display: flex;
+            justify-content: center;
+        }
+        #version {
+            margin-top: 40px;
+            font-size: 14px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <h1>Text to Codes</h1>
+    <textarea id="inputText" rows="3"></textarea>
+    <button onclick="convertToQR()">Convert</button>
+    <div id="qrContainer"></div>
+    <div id="version">AI Chat Message ID: 20250806-TextToQR</div>
+
+    <script>
+        function convertToQR() {
+            const inputText = document.getElementById('inputText').value;
+            const qrContainer = document.getElementById('qrContainer');
+            qrContainer.innerHTML = ''; // Clear previous QR codes
+
+            // Split text into chunks of 20 characters
+            const chunks = [];
+            for (let i = 0; i < inputText.length; i += 20) {
+                chunks.push(inputText.slice(i, i + 20));
+            }
+
+            // Generate QR code for each chunk
+            chunks.forEach((chunk, index) => {
+                const qrDiv = document.createElement('div');
+                qrDiv.className = 'qrCode';
+                qrDiv.id = `qrcode-${index}`;
+                qrContainer.appendChild(qrDiv);
+
+                new QRCode(qrDiv, {
+                    text: chunk,
+                    width: 128,
+                    height: 128,
+                    colorDark: "#000000",
+                    colorLight: "#ffffff",
+                    correctLevel: QRCode.CorrectLevel.H
+                });
+            });
+        }
+    </script>
+</body>
+</html>
