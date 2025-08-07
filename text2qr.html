@@ -60,7 +60,7 @@
     <textarea id="inputText" rows="3"></textarea>
     <button onclick="convertToQR()">Convert</button>
     <div id="qrContainer"></div>
-    <div id="version">AI Chat Message ID: 20250806-TextToQR</div>
+    <div id="version">AI Chat Message ID: 20250807-TextToQRv2</div>
 
     <script>
         function convertToQR() {
@@ -68,27 +68,22 @@
             const qrContainer = document.getElementById('qrContainer');
             qrContainer.innerHTML = ''; // Clear previous QR codes
 
-            // Split text into chunks of 20 characters
-            const chunks = [];
-            for (let i = 0; i < inputText.length; i += 20) {
-                chunks.push(inputText.slice(i, i + 20));
-            }
+            // Log the input text for debugging
+            console.log('Input text:', inputText);
 
-            // Generate QR code for each chunk
-            chunks.forEach((chunk, index) => {
-                const qrDiv = document.createElement('div');
-                qrDiv.className = 'qrCode';
-                qrDiv.id = `qrcode-${index}`;
-                qrContainer.appendChild(qrDiv);
+            // Generate a single QR code for the entire text
+            const qrDiv = document.createElement('div');
+            qrDiv.className = 'qrCode';
+            qrDiv.id = 'qrcode-0';
+            qrContainer.appendChild(qrDiv);
 
-                new QRCode(qrDiv, {
-                    text: chunk,
-                    width: 128,
-                    height: 128,
-                    colorDark: "#000000",
-                    colorLight: "#ffffff",
-                    correctLevel: QRCode.CorrectLevel.H
-                });
+            new QRCode(qrDiv, {
+                text: inputText,
+                width: 256, // Increased size for better scannability
+                height: 256,
+                colorDark: "#000000",
+                colorLight: "#ffffff",
+                correctLevel: QRCode.CorrectLevel.M // Changed to medium for compatibility
             });
         }
     </script>
