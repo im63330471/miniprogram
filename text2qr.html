@@ -57,35 +57,12 @@
 </head>
 <body>
     <h1>Text to Codes</h1>
-    <textarea id="inputText" rows="3"></textarea>
+    <textarea id="inputText" rows="3">London Bridge is falling down</textarea>
     <button onclick="convertToQR()">Convert</button>
     <div id="qrContainer"></div>
-    <div id="version">AI Chat Message ID: 20250807-TextToQRv2</div>
+    <div id="version">AI Chat Message ID: 20250807-TextToQRv4</div>
 
     <script>
         function convertToQR() {
             const inputText = document.getElementById('inputText').value;
             const qrContainer = document.getElementById('qrContainer');
-            qrContainer.innerHTML = ''; // Clear previous QR codes
-
-            // Log the input text for debugging
-            console.log('Input text:', inputText);
-
-            // Generate a single QR code for the entire text
-            const qrDiv = document.createElement('div');
-            qrDiv.className = 'qrCode';
-            qrDiv.id = 'qrcode-0';
-            qrContainer.appendChild(qrDiv);
-
-            new QRCode(qrDiv, {
-                text: inputText,
-                width: 256, // Increased size for better scannability
-                height: 256,
-                colorDark: "#000000",
-                colorLight: "#ffffff",
-                correctLevel: QRCode.CorrectLevel.M // Changed to medium for compatibility
-            });
-        }
-    </script>
-</body>
-</html>
